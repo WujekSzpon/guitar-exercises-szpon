@@ -79,13 +79,25 @@
   .state-msg { text-align:center; padding:4rem 2rem; color:var(--muted); font-size:14px; }
 
   @media print {
+    @page { margin: 15mm; size: A4; }
     #login-screen, header, .toolbar, .tags-row { display:none !important; }
-    body { background:white !important; color:black !important; }
-    .card { border:1px solid #ccc !important; break-inside:avoid; }
-    .card-title { color:black !important; }
-    .card-desc { color:#555 !important; }
-    .thumb { background:#eee !important; }
-    .grid-wrap { padding:0 !important; }
+    body { background:#0f0f0f !important; color:#f0ece0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .hero { padding:1rem 0 1rem !important; border-bottom:1px solid #2e2e2e !important; }
+    .hero h1 { font-size:20px !important; }
+    .hero p { display:none; }
+    .grid-wrap { padding:1rem 0 0 !important; }
+    .section-label { color:#888 !important; }
+    .grid { grid-template-columns:repeat(3, 1fr) !important; gap:10px !important; }
+    .card { border:1px solid #2e2e2e !important; break-inside:avoid; background:#1a1a1a !important; }
+    .card-title { color:#f0ece0 !important; font-size:11px !important; }
+    .card-desc { color:#888 !important; font-size:10px !important; }
+    .card-tag { background:#1a1500 !important; color:#c8a84b !important; border-color:#2e2500 !important; }
+    .thumb { height:80px !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .badge { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .b-poc { background:#1a2e14 !important; color:#7bc96f !important; }
+    .b-sr  { background:#2e2010 !important; color:#e8a84b !important; }
+    .b-zaa { background:#2e1010 !important; color:#e87070 !important; }
+    .b-kat { background:#1a1a2e !important; color:#8888ee !important; }
   }
 </style>
 </head>
@@ -191,7 +203,7 @@ function checkPwd() {
 }
 
 let exercises = [];
-let activeTag = '';
+let activeTags = new Set();
 
 function loadExcel() {
   fetch(PLIK)
@@ -207,6 +219,7 @@ function loadExcel() {
         poziom:  r['POZIOM']           || '',
         tagi:    (r['TAGI'] || '').split(',').map(t => t.trim()).filter(Boolean),
         link:    r['LINK']             || '#',
+        okladka: r['LINK DO OKŁADKI'] || '',
         opis:    r['OPIS']             || '',
       })).filter(e => e.nazwa);
 
@@ -236,12 +249,11 @@ function loadExcel() {
 }
 
 function toggleTag(tag, btn) {
-  if (activeTag === tag) {
-    activeTag = '';
+  if (activeTags.has(tag)) {
+    activeTags.delete(tag);
     btn.classList.remove('active');
   } else {
-    document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
-    activeTag = tag;
+    activeTags.add(tag);
     btn.classList.add('active');
   }
   render();
@@ -256,7 +268,7 @@ function render() {
     (!q  || e.nazwa.toLowerCase().includes(q) || e.opis.toLowerCase().includes(q) || e.tagi.some(t => t.toLowerCase().includes(q))) &&
     (!kt || e.kat === kt) &&
     (!lv || e.poziom === lv) &&
-    (!activeTag || e.tagi.includes(activeTag))
+    (activeTags.size === 0 || [...activeTags].every(t => e.tagi.includes(t)))
   );
 
   document.getElementById('count').textContent = filtered.length + ' ćwiczeń';
@@ -264,7 +276,7 @@ function render() {
   const parts = [];
   if (kt) parts.push(kt);
   if (lv) parts.push(lv);
-  if (activeTag) parts.push('#' + activeTag);
+  if (activeTags.size > 0) activeTags.forEach(t => parts.push('#' + t));
   document.getElementById('section-label').textContent = parts.length ? parts.join(' · ') : 'Wszystkie ćwiczenia';
 
   const grid = document.getElementById('grid');
@@ -280,8 +292,9 @@ function render() {
 
   grid.innerHTML = filtered.map(e => {
     const ik = getIkona(e.kat);
-    const baseUrl = `https://raw.githubusercontent.com/WujekSzpon/-wiczenia-gitarowe/main/okladki/${encodeURIComponent(e.nazwa)}`;
-    const thumb = `<img src="${baseUrl}.png" alt="${e.nazwa}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="if(this.src.endsWith('.png')){this.src=this.src.replace('.png','.jpg')}else{this.style.display='none';this.nextElementSibling.style.display='block';}"><span class="thumb-icon" style="display:none">${ik.icon}</span>`;
+    const thumb = e.okladka
+      ? `<img src="${e.okladka}" alt="${e.nazwa}" loading="lazy">`
+      : `<span class="thumb-icon">${ik.icon}</span>`;
     const desc = e.opis ? `<div class="card-desc">${e.opis}</div>` : '';
     const tagsHtml = e.tagi.length ? `<div class="card-tags">${e.tagi.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>` : '';
     const katBadge = e.kat ? `<span class="badge b-kat">${e.kat}</span>` : '';
@@ -303,7 +316,7 @@ function resetFilters() {
   document.getElementById('search').value = '';
   document.getElementById('kat').value = '';
   document.getElementById('lvl').value = '';
-  activeTag = '';
+  activeTags.clear();
   document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
   render();
 }
