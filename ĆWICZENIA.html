@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>W Szponach Gitary — Biblioteka Ćwiczeń</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -131,7 +132,7 @@
     <option>Zaawansowany</option>
   </select>
   <button class="btn-toolbar" onclick="resetFilters()">✕ Reset</button>
-  <button class="btn-toolbar" onclick="window.print()">⬇ Zapisz PDF</button>
+  <button class="btn-toolbar" id="pdf-btn" onclick="exportPDF()">⬇ Zapisz PDF</button>
   <span class="count" id="count"></span>
 </div>
 
@@ -318,6 +319,57 @@ function resetFilters() {
   activeTags.clear();
   document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
   render();
+}
+
+function exportPDF() {
+  const btn = document.getElementById('pdf-btn');
+  btn.textContent = '⏳ Generuję…';
+  btn.disabled = true;
+
+  const element = document.getElementById('grid');
+  const label = document.getElementById('section-label').textContent;
+  const count = document.getElementById('count').textContent;
+
+  // Build a self-contained PDF page
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'background:#0f0f0f;padding:20px;font-family:Inter,sans-serif;color:#f0ece0;';
+
+  // Header
+  wrap.innerHTML = `
+    <div style="border-bottom:1px solid #2e2e2e;padding-bottom:12px;margin-bottom:16px;">
+      <div style="font-size:20px;font-weight:600;color:#c8a84b;letter-spacing:0.04em;">🎸 W Szponach Gitary</div>
+      <div style="font-size:13px;color:#888;margin-top:4px;">${label} · ${count}</div>
+    </div>
+    <div id="pdf-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
+  `;
+
+  document.body.appendChild(wrap);
+
+  // Clone cards into PDF grid
+  const pdfGrid = wrap.querySelector('#pdf-grid');
+  const cards = element.querySelectorAll('.card');
+  cards.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.style.cssText = 'background:#1a1a1a;border:1px solid #2e2e2e;border-radius:10px;overflow:hidden;page-break-inside:avoid;';
+    // Fix thumb height
+    const thumb = clone.querySelector('.thumb');
+    if (thumb) thumb.style.height = '90px';
+    pdfGrid.appendChild(clone);
+  });
+
+  const opt = {
+    margin: 10,
+    filename: `cwiczenia-${label.replace(/[^a-zA-Z0-9]/g,'-')}.pdf`,
+    image: { type: 'jpeg', quality: 0.92 },
+    html2canvas: { scale: 2, backgroundColor: '#0f0f0f', useCORS: true, allowTaint: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(wrap).save().then(() => {
+    document.body.removeChild(wrap);
+    btn.textContent = '⬇ Zapisz PDF';
+    btn.disabled = false;
+  });
 }
 </script>
 </body>
