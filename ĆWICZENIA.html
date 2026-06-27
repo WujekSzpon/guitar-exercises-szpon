@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>W Szponach Gitary — Biblioteka Ćwiczeń</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -131,7 +132,7 @@
     <option>Zaawansowany</option>
   </select>
   <button class="btn-toolbar" onclick="resetFilters()">✕ Reset</button>
-  <button class="btn-toolbar" onclick="exportTXT()">⬇ Pobierz listę</button>
+  <button class="btn-toolbar" onclick="exportPDF()">⬇ Pobierz PDF</button>
   <span class="count" id="count"></span>
 </div>
 
@@ -320,9 +321,11 @@ function resetFilters() {
   render();
 }
 
-function exportTXT() {
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
   const label = document.getElementById('section-label').textContent;
-  const count = document.getElementById('count').textContent;
   const filtered = exercises.filter(e =>
     (document.getElementById('search').value === '' || e.nazwa.toLowerCase().includes(document.getElementById('search').value.toLowerCase())) &&
     (document.getElementById('kat').value === '' || e.kat === document.getElementById('kat').value) &&
@@ -330,34 +333,81 @@ function exportTXT() {
     (activeTags.size === 0 || [...activeTags].every(t => e.tagi.includes(t)))
   );
 
-  const lines = [];
-  lines.push('================================================');
-  lines.push('  W SZPONACH GITARY — Lista ćwiczeń');
-  lines.push(`  ${label} · ${count}`);
-  lines.push('================================================');
-  lines.push('');
+  const margin = 15;
+  const pageW = 210;
+  const pageH = 297;
+  const maxY = pageH - margin;
+  let y = margin;
 
+  // Dark background
+  const addBackground = () => {
+    doc.setFillColor(15, 15, 15);
+    doc.rect(0, 0, pageW, pageH, 'F');
+  };
+  addBackground();
+
+  // Header
+  doc.setFontSize(18);
+  doc.setTextColor(200, 168, 75); // gold
+  doc.text('W Szponach Gitary', margin, y);
+  y += 7;
+
+  doc.setFontSize(10);
+  doc.setTextColor(136, 136, 136); // muted
+  doc.text(`${label} · ${filtered.length} ćwiczeń`, margin, y);
+  y += 5;
+
+  // Divider
+  doc.setDrawColor(46, 46, 46);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
+
+  // List
   filtered.forEach((e, i) => {
-    lines.push(`${i + 1}. ${e.nazwa}`);
-    if (e.poziom) lines.push(`   Poziom:    ${e.poziom}`);
-    if (e.kat)    lines.push(`   Kategoria: ${e.kat}`);
-    if (e.tagi.length) lines.push(`   Tagi:      ${e.tagi.join(', ')}`);
-    if (e.opis)   lines.push(`   Opis:      ${e.opis}`);
-    if (e.link && e.link !== '#') lines.push(`   Link:      ${e.link}`);
-    lines.push('');
+    if (y > maxY - 8) {
+      doc.addPage();
+      addBackground();
+      y = margin;
+    }
+
+    // Number
+    doc.setFontSize(9);
+    doc.setTextColor(136, 136, 136);
+    doc.text(`${i + 1}.`, margin, y);
+
+    // Title as link
+    doc.setFontSize(11);
+    doc.setTextColor(240, 236, 224);
+    const titleX = margin + 8;
+    const titleLines = doc.splitTextToSize(e.nazwa, pageW - margin - titleX);
+    
+    if (e.link && e.link !== '#') {
+      doc.setTextColor(200, 168, 75);
+      doc.textWithLink(titleLines[0], titleX, y, { url: e.link });
+      // underline
+      const textW = doc.getTextWidth(titleLines[0]);
+      doc.setDrawColor(200, 168, 75);
+      doc.setLineWidth(0.2);
+      doc.line(titleX, y + 0.5, titleX + textW, y + 0.5);
+    } else {
+      doc.setTextColor(240, 236, 224);
+      doc.text(titleLines[0], titleX, y);
+    }
+
+    y += 8;
   });
 
-  lines.push('================================================');
-  lines.push('  wszonachgitary.pl');
-  lines.push('================================================');
+  // Footer
+  if (y > maxY - 10) { doc.addPage(); addBackground(); y = margin; }
+  y += 4;
+  doc.setDrawColor(46, 46, 46);
+  doc.line(margin, y, pageW - margin, y);
+  y += 5;
+  doc.setFontSize(8);
+  doc.setTextColor(136, 136, 136);
+  doc.text('W Szponach Gitary — wszonachgitary.pl', margin, y);
 
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `cwiczenia-${label.replace(/[^a-zA-Z0-9]/g,'-')}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
+  doc.save(`cwiczenia-${label.replace(/[^a-zA-Z0-9]/g,'-')}.pdf`);
 }
 </script>
 </body>
