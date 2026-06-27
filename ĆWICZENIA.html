@@ -326,57 +326,73 @@ function exportPDF() {
   btn.textContent = '⏳ Generuję…';
   btn.disabled = true;
 
-  const element = document.getElementById('grid');
   const label = document.getElementById('section-label').textContent;
   const count = document.getElementById('count').textContent;
+  const cards = document.querySelectorAll('#grid .card');
 
-  // Build a self-contained PDF page
+  // Build PDF container
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'background:#0f0f0f;padding:14px 16px;font-family:Inter,sans-serif;color:#f0ece0;width:390px;box-sizing:border-box;';
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:390px;background:#0f0f0f;padding:16px;box-sizing:border-box;font-family:Inter,sans-serif;color:#f0ece0;';
 
-  // Header
   wrap.innerHTML = `
-    <div style="border-bottom:1px solid #2e2e2e;padding-bottom:12px;margin-bottom:16px;">
-      <div style="font-size:20px;font-weight:600;color:#c8a84b;letter-spacing:0.04em;">🎸 W Szponach Gitary</div>
-      <div style="font-size:13px;color:#888;margin-top:4px;">${label} · ${count}</div>
+    <div style="border-bottom:1px solid #2e2e2e;padding-bottom:10px;margin-bottom:14px;">
+      <div style="font-size:18px;font-weight:600;color:#c8a84b;">🎸 W Szponach Gitary</div>
+      <div style="font-size:12px;color:#888;margin-top:3px;">${label} · ${count}</div>
     </div>
-    <div id="pdf-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+    <div id="pdf-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
   `;
+  document.body.appendChild(wrap);
 
-  // Clone cards into PDF grid
   const pdfGrid = wrap.querySelector('#pdf-grid');
-  const cards = element.querySelectorAll('.card');
   cards.forEach(card => {
     const clone = card.cloneNode(true);
-    clone.style.cssText = 'background:#1a1a1a;border:1px solid #2e2e2e;border-radius:10px;overflow:hidden;page-break-inside:avoid;';
-    // Fix thumb height
+    clone.style.cssText = 'background:#1a1a1a;border:1px solid #2e2e2e;border-radius:8px;overflow:hidden;text-decoration:none;display:block;';
     const thumb = clone.querySelector('.thumb');
-    if (thumb) thumb.style.height = '90px';
+    if (thumb) {
+      thumb.style.height = '85px';
+      thumb.style.position = 'relative';
+      thumb.style.overflow = 'hidden';
+      const img = thumb.querySelector('img');
+      if (img) {
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;';
+      }
+    }
+    const body = clone.querySelector('.card-body');
+    if (body) body.style.padding = '8px';
+    const title = clone.querySelector('.card-title');
+    if (title) title.style.cssText = 'font-size:11px;font-weight:500;color:#f0ece0;margin-bottom:5px;line-height:1.3;';
+    const desc = clone.querySelector('.card-desc');
+    if (desc) desc.style.cssText = 'font-size:10px;color:#888;margin-bottom:5px;';
     pdfGrid.appendChild(clone);
   });
 
-  // Measure actual height after render for single-page PDF
-  document.body.appendChild(wrap);
-  const totalHeight = wrap.scrollHeight;
-  document.body.removeChild(wrap);
+  setTimeout(() => {
+    const totalH = wrap.scrollHeight;
+    const pxToMm = 0.2645;
+    const opt = {
+      margin: 0,
+      filename: `cwiczenia-${label.replace(/[^a-zA-Z0-9]/g,'-')}.pdf`,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: {
+        scale: 2,
+        backgroundColor: '#0f0f0f',
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: [390 * pxToMm, (totalH + 20) * pxToMm],
+        orientation: 'portrait'
+      }
+    };
 
-  const pxToMm = 0.2645;
-  const widthMm = 390 * pxToMm;
-  const heightMm = totalHeight * pxToMm + 10;
-
-  const opt = {
-    margin: 0,
-    filename: `cwiczenia-${label.replace(/[^a-zA-Z0-9]/g,'-')}.pdf`,
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, backgroundColor: '#0f0f0f', useCORS: true, allowTaint: true, windowWidth: 390 },
-    jsPDF: { unit: 'mm', format: [widthMm, heightMm], orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(wrap).save().then(() => {
-    document.body.removeChild(wrap);
-    btn.textContent = '⬇ Zapisz PDF';
-    btn.disabled = false;
-  });
+    html2pdf().set(opt).from(wrap).save().then(() => {
+      document.body.removeChild(wrap);
+      btn.textContent = '⬇ Zapisz PDF';
+      btn.disabled = false;
+    });
+  }, 500);
 }
 </script>
 </body>
