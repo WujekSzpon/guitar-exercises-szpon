@@ -1,0 +1,21 @@
+{
+  "porady": [
+    "Zanim zwiększysz tempo — upewnij się, że grasz bez napięcia w dłoni. Luz to podstawa techniki.",
+    "Ćwicz krótko ale regularnie. 15 minut dziennie da Ci więcej niż 2 godziny raz w tygodniu.",
+    "Używaj metronomu od samego początku — rytm to fundament każdego gitarzysty.",
+    "Nagraj się podczas ćwiczenia. Usłyszysz błędy których nie słyszysz w trakcie gry.",
+    "Uczysz się nowego ćwiczenia? Zacznij od połowy docelowego tempa i stopniowo przyspieszaj."
+  ],
+  "reklamy": [
+    {
+      "text": "Chcesz rozwijać się szybciej? Sprawdź indywidualne lekcje gitary z Wujkiem Szponem!",
+      "link": "https://wszponachgitary.short.gy/sklep",
+      "linkText": "Zapisz się na lekcje →"
+    },
+    {
+      "text": "Więcej materiałów, opracowań i ćwiczeń czeka w moim sklepie gitarowym.",
+      "link": "https://wszponachgitary.short.gy/sklep",
+      "linkText": "Odwiedź sklep →"
+    }
+  ]
+}
