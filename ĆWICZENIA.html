@@ -36,7 +36,7 @@
   .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:1rem 2rem; border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:58px; z-index:9; }
 
   .toolbar input, .toolbar select { background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:7px 12px; font-size:13px; font-family:'Open Sans',sans-serif; outline:none; transition:border-color 0.15s; box-sizing:border-box; }
-  #search { width:152px; }
+  #search { width:150px; }
   #sort { width:152px; }
   #kat { width:152px; }
   #lvl { width:152px; }
@@ -318,6 +318,7 @@ function checkPwd() {
   const inp = document.getElementById('pwd-input');
   const err = document.getElementById('login-error');
   if (val === HASLO) {
+    localStorage.setItem('wsg_auth', HASLO);
     document.getElementById('login-screen').style.display = 'none';
     loadExcel();
   } else {
@@ -327,6 +328,14 @@ function checkPwd() {
     setTimeout(() => inp.classList.remove('error'), 600);
   }
 }
+
+// Auto-login if password already saved
+(function() {
+  if (localStorage.getItem('wsg_auth') === HASLO) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.addEventListener('DOMContentLoaded', loadExcel);
+  }
+})();
 
 let exercises = [];
 let favorites = new Set(JSON.parse(localStorage.getItem('wsg_favorites') || '[]'));
