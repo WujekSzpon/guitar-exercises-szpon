@@ -38,8 +38,13 @@
 
   /* TOOLBAR */
   .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:1rem 2rem; border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:58px; z-index:9; }
-  .toolbar input, .toolbar select { background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:7px 12px; font-size:13px; font-family:'Open Sans',sans-serif; outline:none; transition:border-color 0.15s; }
-  .toolbar input { width:200px; }
+
+  .toolbar input, .toolbar select { background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:7px 12px; font-size:13px; font-family:'Open Sans',sans-serif; outline:none; transition:border-color 0.15s; box-sizing:border-box; }
+  #search { width:162px; }
+  #sort { width:162px; }
+  #kat { width:162px; }
+  #lvl { width:162px; }
+  
   .toolbar input::placeholder { color:var(--muted); }
   .toolbar input:focus, .toolbar select:focus { border-color:#ffcc00; }
   .toolbar select option { background:#1a1a1a; }
@@ -48,10 +53,21 @@
   .btn-toolbar:hover { border-color:var(--accent); color:var(--accent); }
 
   /* TAGS ROW */
-  .tags-row { display:flex; gap:6px; flex-wrap:wrap; padding:0.75rem 2rem; border-bottom:1px solid var(--border); min-height:42px; align-items:center; }
-  .tag-chip { font-size:11px; padding:3px 10px; border-radius:99px; border:1px solid var(--border); color:var(--muted); cursor:pointer; background:transparent; font-family:'Open Sans',sans-serif; transition:all 0.15s; }
+  .tags-row { display:none; }
+  .tag-chip { font-size:12px; padding:5px 12px; border-radius:99px; border:1px solid var(--border); color:var(--muted); cursor:pointer; background:transparent; font-family:'Open Sans',sans-serif; transition:all 0.15s; display:flex; align-items:center; gap:6px; }
   .tag-chip:hover, .tag-chip.active { border-color:#ffcc00; color:#ffcc00; background:#1a1500; }
+  .tag-chip.active::before { content:'✓'; font-size:10px; }
   .tags-label { font-size:11px; color:var(--muted); margin-right:4px; }
+  /* TAGS DROPDOWN */
+  #tags-dropdown { position:fixed; inset:0; z-index:200; display:none; }
+  #tags-dropdown.open { display:block; }
+  #tags-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); }
+  #tags-panel { position:absolute; bottom:0; left:0; right:0; background:var(--surface); border-radius:16px 16px 0 0; padding:20px; max-height:70vh; overflow-y:auto; }
+  #tags-panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  #tags-panel-title { font-family:'Oswald',sans-serif; font-size:16px; font-weight:600; color:var(--text); }
+  #tags-chips { display:flex; flex-wrap:wrap; gap:8px; }
+  #tags-apply { background:#ffcc00; color:#000; border:none; border-radius:8px; padding:10px 24px; font-size:13px; font-weight:700; cursor:pointer; width:100%; margin-top:16px; font-family:'Oswald',sans-serif; letter-spacing:0.04em; }
+  #tags-clear { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:8px 14px; font-size:12px; cursor:pointer; }
 
   /* GRID */
   .grid-wrap { padding:1.5rem 2rem 3rem; }
@@ -101,6 +117,38 @@
     .b-zaa { background:#E53935 !important; color:#fff !important; }
     .b-kat { background:#1a1a2e !important; color:#8888ee !important; }
   }
+
+  /* POPUP */
+  #tip-popup {
+    position: fixed;
+    overflow: hidden;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(500px, 90vw);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    z-index: 100;
+    transition: top 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  #tip-popup.show { top: 70px; }
+  #tip-popup.ad { border-color: #ffcc00; }
+  .tip-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .tip-content { flex: 1; }
+  .tip-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+  .tip-label.ad-label { color: #ffcc00; }
+  .tip-text { font-size: 13px; color: var(--text); line-height: 1.45; }
+  .tip-link { font-size: 12px; color: #ffcc00; text-decoration: underline; display: inline-block; margin-top: 5px; font-weight: 600; }
+  .tip-close { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0; flex-shrink: 0; line-height: 1; }
+  .tip-close:hover { color: var(--text); }
+  .tip-progress { position:absolute; bottom:0; left:0; height:3px; width:100%; background:#ffcc00; border-radius:0 0 var(--radius) var(--radius); transform-origin:left; }
+  .tip-progress.running { transition:transform linear; transform:scaleX(0); }
 </style>
 </head>
 <body>
@@ -121,7 +169,7 @@
   <div class="logo">
     <img src="https://raw.githubusercontent.com/WujekSzpon/guitar-exercises-szpon/main/branding/LOGO%20-%20W%20SZPONACH%20GITARY%20BLANK.png" alt="W Szponach Gitary" style="height:38px;object-fit:contain;">
   </div>
-  <div class="header-right">Strefa Patronów</div>
+
 </header>
 
 <div class="hero">
@@ -134,36 +182,52 @@
   </div>
 </div>
 
-<div class="toolbar">
-  <input type="text" id="search" placeholder="🔍  Szukaj ćwiczenia…" oninput="render()">
-  <select id="kat" onchange="render()"><option value="">Wszystkie kategorie</option></select>
-  <select id="lvl" onchange="render()">
-    <option value="">Wszystkie poziomy</option>
-    <option>PROSTY</option>
-    <option>ŚREDNI</option>
-    <option>TRUDNY</option>
-  </select>
-  <select id="sort" onchange="render()">
-    <option value="">Sortuj</option>
-    <option value="az">A → Z</option>
-    <option value="za">Z → A</option>
-    <option value="lvl_asc">Poziom: łatwe → trudne</option>
-    <option value="lvl_desc">Poziom: trudne → łatwe</option>
-  </select>
-  <button class="btn-toolbar" onclick="resetFilters()">✕ Reset</button>
-  <div style="display:flex;align-items:center;gap:4px;">
-    <button class="btn-toolbar" onclick="changeSize(-40)" title="Pomniejsz">−</button>
-    <button class="btn-toolbar" onclick="changeSize(40)" title="Powiększ">+</button>
+<div id="toolbar-wrap">
+
+  <!-- FULL TOOLBAR -->
+  <div class="toolbar" id="toolbar">
+    <!-- Row 1: Szukaj + Sortuj -->
+    <input type="text" id="search" placeholder="🔍 Szukaj…" oninput="render()">
+    <select id="sort" onchange="render()">
+      <option value="">Sortuj…</option>
+      <option value="az">A → Z</option>
+      <option value="za">Z → A</option>
+      <option value="lvl_asc">Łatwe → Trudne</option>
+      <option value="lvl_desc">Trudne → Łatwe</option>
+      <option value="fav">♥ Ulubione</option>
+    </select>
+    <!-- Row 2: Kategorie + Poziomy -->
+    <select id="kat" onchange="render()"><option value="">Kategorie</option></select>
+    <select id="lvl" onchange="render()">
+      <option value="">Poziomy</option>
+      <option>PROSTY</option>
+      <option>ŚREDNI</option>
+      <option>TRUDNY</option>
+    </select>
+    <!-- Row 3: + - PDF TAGI RESET -->
+    <div class="toolbar-btns">
+      <button class="btn-toolbar" onclick="changeSize(-40)" style="padding-left:13px;padding-right:13px;">−</button>
+      <button class="btn-toolbar" onclick="changeSize(40)" style="padding-left:13px;padding-right:13px;">+</button>
+      <button class="btn-toolbar" onclick="exportPDF()">PDF</button>
+      <button class="btn-toolbar" id="tags-btn" onclick="openTagsPanel()">TAGI<span id="tags-count-badge" style="display:none;background:#ffcc00;color:#000;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:3px;"></span></button>
+      <button class="btn-toolbar" onclick="resetFilters()">RESET</button>
+    </div>
+    <span class="count" id="count"></span>
   </div>
-  <button class="btn-toolbar" onclick="exportPDF()">⬇ Pobierz PDF</button>
-  <span class="count" id="count"></span>
 </div>
 
-<div style="padding:0.5rem 2rem;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">
-  <button class="btn-toolbar" id="fav-filter-btn" onclick="toggleFavFilter()" style="display:flex;align-items:center;gap:5px;">♥ Ulubione</button>
-</div>
-<div class="tags-row" id="tags-row">
-  <span class="tags-label">Tagi:</span>
+<div class="tags-row" id="tags-row"></div>
+
+<div id="tags-dropdown">
+  <div id="tags-backdrop" onclick="closeTagsPanel()"></div>
+  <div id="tags-panel">
+    <div id="tags-panel-header">
+      <span id="tags-panel-title">Wybierz tagi</span>
+      <button id="tags-clear" onclick="clearTags()">Wyczyść</button>
+    </div>
+    <div id="tags-chips"></div>
+    <button id="tags-apply" onclick="closeTagsPanel()">Zastosuj filtry</button>
+  </div>
 </div>
 
 <div class="grid-wrap">
@@ -256,8 +320,7 @@ function checkPwd() {
 let exercises = [];
 let favorites = new Set(JSON.parse(localStorage.getItem('wsg_favorites') || '[]'));
 
-function toggleFav(id, btn, e_link) {
-  e_link.stopPropagation();
+function toggleFav(id, btn) {
   if (favorites.has(id)) {
     favorites.delete(id);
     btn.textContent = '♡';
@@ -270,15 +333,7 @@ function toggleFav(id, btn, e_link) {
   localStorage.setItem('wsg_favorites', JSON.stringify([...favorites]));
 }
 let activeTags = new Set();
-let showOnlyFav = false;
 
-function toggleFavFilter() {
-  showOnlyFav = !showOnlyFav;
-  const btn = document.getElementById('fav-filter-btn');
-  btn.style.borderColor = showOnlyFav ? '#E53935' : '';
-  btn.style.color = showOnlyFav ? '#E53935' : '';
-  render();
-}
 
 function loadExcel() {
   fetch(PLIK)
@@ -303,16 +358,17 @@ function loadExcel() {
       const sel = document.getElementById('kat');
       kats.forEach(k => { const o = document.createElement('option'); o.value = o.textContent = k; sel.appendChild(o); });
 
-      // Populate tagi
+      // Populate tagi panel
       const allTags = [...new Set(exercises.flatMap(e => e.tagi))].sort();
-      const tagsRow = document.getElementById('tags-row');
-      tagsRow.innerHTML = '<span class="tags-label">Tagi:</span>';
+      const chipsContainer = document.getElementById('tags-chips');
+      chipsContainer.innerHTML = '';
       allTags.forEach(tag => {
         const btn = document.createElement('button');
         btn.className = 'tag-chip';
         btn.textContent = tag;
+        btn.dataset.tag = tag;
         btn.onclick = () => toggleTag(tag, btn);
-        tagsRow.appendChild(btn);
+        chipsContainer.appendChild(btn);
       });
 
       document.getElementById('state-msg').style.display = 'none';
@@ -323,6 +379,37 @@ function loadExcel() {
     });
 }
 
+function openTagsPanel() {
+  document.getElementById('tags-dropdown').classList.add('open');
+}
+
+function closeTagsPanel() {
+  document.getElementById('tags-dropdown').classList.remove('open');
+  updateTagsBadge();
+  render();
+}
+
+function clearTags() {
+  activeTags.clear();
+  document.querySelectorAll('#tags-chips .tag-chip').forEach(b => b.classList.remove('active'));
+  updateTagsBadge();
+  render();
+}
+
+function updateTagsBadge() {
+  const badge = document.getElementById('tags-count-badge');
+  if (activeTags.size > 0) {
+    badge.textContent = activeTags.size;
+    badge.style.display = 'inline-block';
+    document.getElementById('tags-btn').style.borderColor = '#ffcc00';
+    document.getElementById('tags-btn').style.color = '#ffcc00';
+  } else {
+    badge.style.display = 'none';
+    document.getElementById('tags-btn').style.borderColor = '';
+    document.getElementById('tags-btn').style.color = '';
+  }
+}
+
 function toggleTag(tag, btn) {
   if (activeTags.has(tag)) {
     activeTags.delete(tag);
@@ -331,7 +418,6 @@ function toggleTag(tag, btn) {
     activeTags.add(tag);
     btn.classList.add('active');
   }
-  render();
 }
 
 function render() {
@@ -344,7 +430,8 @@ function render() {
     (!q  || e.nazwa.toLowerCase().includes(q) || e.opis.toLowerCase().includes(q) || e.tagi.some(t => t.toLowerCase().includes(q))) &&
     (!kt || e.kat === kt) &&
     (!lv || e.poziom === lv) &&
-    (activeTags.size === 0 || [...activeTags].every(t => e.tagi.includes(t)))
+    (activeTags.size === 0 || [...activeTags].every(t => e.tagi.includes(t))) &&
+    (sortVal !== 'fav' || favorites.has(e.id))
   );
 
   const lvlOrder = {'PROSTY':1,'ŚREDNI':2,'TRUDNY':3,'ZAAWANSOWANY':3};
@@ -352,6 +439,7 @@ function render() {
   else if (sortVal === 'za') filtered.sort((a,b) => b.nazwa.localeCompare(a.nazwa, 'pl'));
   else if (sortVal === 'lvl_asc') filtered.sort((a,b) => (lvlOrder[a.poziom.toUpperCase()]||0) - (lvlOrder[b.poziom.toUpperCase()]||0));
   else if (sortVal === 'lvl_desc') filtered.sort((a,b) => (lvlOrder[b.poziom.toUpperCase()]||0) - (lvlOrder[a.poziom.toUpperCase()]||0));
+  // fav handled in filter below
   document.getElementById('count').textContent = filtered.length + ' ćwiczeń';
 
   const parts = [];
@@ -383,7 +471,7 @@ function render() {
     const isFav = favorites.has(e.id);
     return `
       <a class="card" href="${e.link}" target="_blank" rel="noopener" style="--kat-color:${katColor};position:relative;">
-        <button onclick="toggleFav(${e.id}, this, event)" style="position:absolute;top:6px;right:8px;z-index:2;background:rgba(0,0,0,0.5);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;color:${isFav?'#E53935':'#666'};display:flex;align-items:center;justify-content:center;">${isFav?'♥':'♡'}</button>
+        <button onclick="event.preventDefault();event.stopPropagation();toggleFav(${e.id}, this);" style="position:absolute;top:6px;left:8px;z-index:2;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px;color:${isFav?'#E53935':'#888'};display:flex;align-items:center;justify-content:center;line-height:1;">${isFav?'♥':'♡'}</button>
         <div class="thumb" style="background:${ik.bg}">${thumb}</div>
         <div class="card-body">
           <div class="card-title">${e.nazwa}</div>
@@ -395,7 +483,7 @@ function render() {
   }).join('');
 }
 
-let cardSize = 440;
+let cardSize = window.innerWidth <= 640 ? 160 : 440;
 
 function changeSize(delta) {
   cardSize = Math.min(550, Math.max(140, cardSize + delta));
@@ -404,15 +492,47 @@ function changeSize(delta) {
   document.querySelectorAll('.thumb').forEach(t => t.style.height = thumbH + 'px');
 }
 
+// TOOLBAR SCROLL BEHAVIOR
+let lastScroll = 0;
+let toolbarCollapsed = false;
+
+window.addEventListener('scroll', () => {
+  const current = window.scrollY;
+  const toolbar = document.getElementById('toolbar');
+  const mini = document.getElementById('toolbar-mini');
+  const count = document.getElementById('count');
+
+  if (current > lastScroll && current > 100 && !toolbarCollapsed) {
+    toolbar.classList.add('hidden');
+    mini.classList.add('visible');
+    document.getElementById('header-logo').style.display = 'none';
+    toolbarCollapsed = true;
+    document.getElementById('toolbar-mini-count').textContent = document.getElementById('count').textContent;
+  } else if (current < lastScroll - 10 && toolbarCollapsed) {
+    toolbar.classList.remove('hidden');
+    mini.classList.remove('visible');
+    toolbarCollapsed = false;
+  }
+  lastScroll = Math.max(0, current);
+});
+
+function expandToolbar() {
+  document.getElementById('toolbar').classList.remove('hidden');
+  document.getElementById('toolbar-mini').classList.remove('visible');
+  document.getElementById('header-logo').style.display = '';
+  document.getElementById('main-header').style.cursor = 'default';
+  document.getElementById('main-header').onclick = null;
+  toolbarCollapsed = false;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
 function resetFilters() {
   document.getElementById('search').value = '';
   document.getElementById('kat').value = '';
   document.getElementById('lvl').value = '';
   activeTags.clear();
   document.querySelectorAll('.tag-chip').forEach(b => b.classList.remove('active'));
-  showOnlyFav = false;
-  const favBtn = document.getElementById('fav-filter-btn');
-  if (favBtn) { favBtn.style.borderColor=''; favBtn.style.color=''; }
+  updateTagsBadge();
   if (document.getElementById('sort')) document.getElementById('sort').value = '';
   render();
 }
@@ -522,6 +642,93 @@ function exportPDF() {
 
   doc.save(`cwiczenia-${label.replace(/[^a-zA-Z0-9]/g,'-')}.pdf`);
 }
+</script>
+
+<div id="tip-popup">
+  <img src="https://raw.githubusercontent.com/WujekSzpon/guitar-exercises-szpon/main/branding/LOGO%20-%20WUJEK%20SZPON%20ROUND.png" alt="Wujek Szpon" style="width:55px;height:55px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #ffcc00;">
+  <div class="tip-content">
+    <div class="tip-label" id="tip-label">PORADA</div>
+    <div class="tip-text" id="tip-text"></div>
+    <a class="tip-link" id="tip-link" href="#" target="_blank" style="display:none"></a>
+  </div>
+  <button class="tip-close" onclick="closePopup()">✕</button>
+  <div class="tip-progress" id="tip-progress"></div>
+</div>
+
+<script>
+let PORADY = [];
+let REKLAMY = [];
+
+fetch('https://raw.githubusercontent.com/WujekSzpon/guitar-exercises-szpon/main/data/tresci.json')
+  .then(r => r.json())
+  .then(data => {
+    PORADY = data.porady || [];
+    REKLAMY = data.reklamy || [];
+  })
+  .catch(() => {
+    // Fallback jeśli plik niedostępny
+    PORADY = ["Ćwicz regularnie — nawet 15 minut dziennie robi różnicę!"];
+    REKLAMY = [{ text: "Sprawdź więcej materiałów w sklepie Wujka Szpona!", link: "https://wszponachgitary.short.gy/sklep", linkText: "Odwiedź sklep →" }];
+  });
+
+let popupIndex = 0;
+let isAd = false;
+let poradyIndex = 0;
+let reklamyIndex = 0;
+let popupTimeout;
+
+function showPopup() {
+  const popup = document.getElementById('tip-popup');
+  const label = document.getElementById('tip-label');
+  const text = document.getElementById('tip-text');
+  const link = document.getElementById('tip-link');
+
+  if (!isAd) {
+    label.textContent = 'PORADA GITAROWA';
+    label.className = 'tip-label';
+    text.textContent = PORADY[poradyIndex % PORADY.length];
+    link.style.display = 'none';
+    popup.classList.remove('ad');
+    poradyIndex++;
+  } else {
+    const ad = REKLAMY[reklamyIndex % REKLAMY.length];
+
+    label.textContent = 'OD WUJKA SZPONA';
+    label.className = 'tip-label ad-label';
+    text.textContent = ad.text;
+    link.href = ad.link;
+    link.textContent = ad.linkText;
+    link.style.display = 'inline-block';
+    popup.classList.add('ad');
+    reklamyIndex++;
+  }
+
+  isAd = !isAd;
+  popup.classList.add('show');
+
+  // Progress bar
+  const bar = document.getElementById('tip-progress');
+  bar.style.transition = 'none';
+  bar.style.transform = 'scaleX(1)';
+  setTimeout(() => {
+    bar.style.transition = 'transform 12s linear';
+    bar.style.transform = 'scaleX(0)';
+  }, 50);
+
+  // Auto-hide after 12 seconds
+  clearTimeout(popupTimeout);
+  popupTimeout = setTimeout(closePopup, 12000);
+}
+
+function closePopup() {
+  document.getElementById('tip-popup').classList.remove('show');
+}
+
+// Start after 30s, then every 2 minutes
+setTimeout(() => {
+  showPopup();
+  setInterval(showPopup, 60000);
+}, 15000);
 </script>
 </body>
 </html>
