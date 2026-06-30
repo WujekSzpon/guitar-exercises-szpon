@@ -83,12 +83,12 @@
   .thumb img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
   .thumb-icon { position:relative; z-index:1; }
   .card-body { padding:10px 12px 13px; }
-  .card-title { font-size:14.5px; font-weight:600; color:#ffffff; margin-bottom:6px; line-height:1.35; }
-  .card-desc { font-size:11px; color:var(--muted); margin-bottom:8px; line-height:1.4; }
-  .card-tags { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:7px; }
+  .card-title { font-size:16.5px; font-weight:600; color:#ffffff; margin-bottom:6px; line-height:1.35; text-align:center; }
+  .card-desc { font-size:11.5px; color:#b3b3b3; margin-bottom:8px; line-height:1.4; text-align:center; }
+  .card-tags { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:7px; justify-content:center; }
   .card-tag { font-size:9px; padding:1px 6px; border-radius:99px; background:#222; color:#aaa; border:1px solid #333; }
-  .badges { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }
-  .badge { font-size:11px; padding:2px 7px; border-radius:99px; font-weight:500; }
+  .badges { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .badge { font-size:12px; padding:2px 7px; border-radius:99px; font-weight:500; }
   .b-lvl { background:#222; color:#fff; border:1px solid #444; }
   .b-poc { background:#4CAF50; color:#fff; border:none; font-weight:700; }
   .b-sr  { background:#FFC107; color:#000; border:none; font-weight:700; }
@@ -249,8 +249,17 @@
 
 <script>
 // ==============================
-// ZMIEŃ HASŁO TUTAJ co miesiąc:
-const HASLO = 'szpon';
+// ZMIEŃ HASŁO TUTAJ co miesiąc.
+// To jest SKRÓT (hash) hasła, nie samo hasło.
+// Aby wygenerować nowy hash, wejdź na: https://emn178.github.io/online-tools/sha256.html
+// wpisz nowe hasło, skopiuj wynik i wklej poniżej.
+const HASLO_HASH = '68c560b7624db202695048ad936136cb0334a6f9163933f4ec3db519c0ddd647';
+
+async function sha256(text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 // ==============================
 
 const PLIK = "https://raw.githubusercontent.com/WujekSzpon/guitar-exercises-szpon/main/%C4%86WICZENIA.xlsx";
@@ -328,12 +337,13 @@ function levelClass(l) {
   return 'b-lvl';
 }
 
-function checkPwd() {
+async function checkPwd() {
   const val = document.getElementById('pwd-input').value;
   const inp = document.getElementById('pwd-input');
   const err = document.getElementById('login-error');
-  if (val === HASLO) {
-    localStorage.setItem('wsg_auth', HASLO);
+  const valHash = await sha256(val);
+  if (valHash === HASLO_HASH) {
+    localStorage.setItem('wsg_auth', HASLO_HASH);
     document.getElementById('login-screen').style.display = 'none';
     loadExcel();
   } else {
@@ -346,7 +356,7 @@ function checkPwd() {
 
 // Auto-login if password already saved
 (function() {
-  if (localStorage.getItem('wsg_auth') === HASLO) {
+  if (localStorage.getItem('wsg_auth') === HASLO_HASH) {
     document.getElementById('login-screen').style.display = 'none';
     document.addEventListener('DOMContentLoaded', loadExcel);
   }
@@ -512,7 +522,7 @@ function render() {
         <div class="card-body">
           <div class="card-title">${e.nazwa.replace(/^[^-]+-\s*/, '')}</div>
           ${desc}
-          <div class="badges">${katBadge}${lvBadge}</div>
+          <div class="badges" style="padding-top:7px;border-top:1px solid #2e2e2e;">${katBadge}${lvBadge}</div>
           ${tagsHtml}
         </div>
       </a>`;
