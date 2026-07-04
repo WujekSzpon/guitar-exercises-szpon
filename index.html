@@ -205,6 +205,18 @@
   </div>
 </div>
 
+<div id="tags-dropdown">
+  <div id="tags-backdrop" onclick="closeTagsPanel()"></div>
+  <div id="tags-panel">
+    <div id="tags-panel-header">
+      <span id="tags-panel-title">Wybierz tagi</span>
+      <button id="tags-clear" onclick="clearTags()">Wyczyść</button>
+    </div>
+    <div id="tags-chips"></div>
+    <button id="tags-apply" onclick="closeTagsPanel()">Zastosuj filtry</button>
+  </div>
+</div>
+
 <div class="grid-wrap">
   <div class="section-label" id="section-label">Wszystkie ćwiczenia</div>
   <div class="grid" id="grid"></div>
