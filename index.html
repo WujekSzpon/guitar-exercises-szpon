@@ -100,6 +100,8 @@
   .thumb { height:132px; display:flex; align-items:center; justify-content:center; font-size:38px; position:relative; overflow:hidden; }
   .thumb img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
   .thumb-icon { position:relative; z-index:1; }
+  .fav-btn { transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease; transform-origin:center; }
+  .fav-btn:hover { transform:scale(1.1); background:rgba(0,0,0,0.75) !important; }
   .card-body { padding:10px 12px 13px; }
   .card-title { font-size:16.5px; font-weight:600; color:#ffffff; margin-bottom:6px; line-height:1.35; text-align:center; }
   .card-desc { font-size:11.5px; color:#b3b3b3; margin-bottom:8px; line-height:1.4; text-align:center; }
@@ -517,7 +519,7 @@ function render() {
     const isFav = favorites.has(e.id);
     return `
       <a class="card" href="${e.link}" target="_blank" rel="noopener" style="--kat-color:${katColor};position:relative;">
-        <button onclick="event.preventDefault();event.stopPropagation();toggleFav(${e.id}, this);" style="position:absolute;top:6px;left:8px;z-index:2;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px;color:${isFav?'#E53935':'#888'};display:flex;align-items:center;justify-content:center;line-height:1;">${isFav?'♥':'♡'}</button>
+        <button class="fav-btn" onclick="event.preventDefault();event.stopPropagation();toggleFav(${e.id}, this);" style="position:absolute;top:6px;left:8px;z-index:2;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px;color:${isFav?'#E53935':'#888'};display:flex;align-items:center;justify-content:center;line-height:1;">${isFav?'♥':'♡'}</button>
         <div class="thumb" style="background:${ik.bg}">${thumb}</div>
         <div class="card-body">
           <div class="card-title">${e.nazwa.replace(/^[^-]+-\s*/, '')}</div>
