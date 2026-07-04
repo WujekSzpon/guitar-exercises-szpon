@@ -33,28 +33,22 @@
 
 
   /* TOOLBAR */
-  .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:1rem 2rem; border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:58px; z-index:9; }
+#toolbar-wrap{position:sticky;top:58px;z-index:9;background:var(--bg);border-bottom:1px solid var(--border);}
+.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px;}
+.toolbar.hidden{display:none;}
+.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 12px;font-size:13px;font-family:'Open Sans',sans-serif;outline:none;transition:border-color 0.15s;width:100%;box-sizing:border-box;}
+.toolbar input::placeholder{color:var(--muted);}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent);}
+.toolbar select option{background:#1a1a1a;}
+#search{width:100% !important;}
+#sort,#kat,#lvl{width:100% !important;}
+.count{font-size:12px;color:var(--muted);text-align:right;grid-column:1/-1;padding:2px 0;}
+.btn-toolbar{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:7px 11px;font-size:12px;cursor:pointer;font-family:'Open Sans',sans-serif;transition:border-color 0.15s,color 0.15s;width:100%;}
+.btn-toolbar:hover{border-color:var(--accent);color:var(--accent);}
+.toolbar-btns{grid-column:1/-1;display:flex;gap:6px;}
+.toolbar-btns .btn-toolbar{flex:1;}
 
-  .toolbar input, .toolbar select { background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:7px 12px; font-size:13px; font-family:'Open Sans',sans-serif; outline:none; transition:border-color 0.15s; box-sizing:border-box; }
-  #search { width:150px; }
-  #sort { width:152px; }
-  #kat { width:152px; }
-  #lvl { width:152px; }
-  
-  .toolbar input::placeholder { color:var(--muted); }
-  .toolbar input:focus, .toolbar select:focus { border-color:#ffcc00; }
-  .toolbar select option { background:#1a1a1a; }
-  .count { margin-left:auto; font-size:12px; color:var(--muted); }
-  .btn-toolbar { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:6px; padding:7px 11px; font-size:12px; cursor:pointer; font-family:'Open Sans',sans-serif; transition:border-color 0.15s, color 0.15s; }
-  .btn-toolbar:hover { border-color:var(--accent); color:var(--accent); }
-
-  /* TAGS ROW */
-  .tags-row { display:none; }
-  .tag-chip { font-size:12px; padding:5px 12px; border-radius:99px; border:1px solid var(--border); color:var(--muted); cursor:pointer; background:transparent; font-family:'Open Sans',sans-serif; transition:all 0.15s; display:flex; align-items:center; gap:6px; }
-  .tag-chip:hover, .tag-chip.active { border-color:#ffcc00; color:#ffcc00; background:#1a1500; }
-  .tag-chip.active::before { content:'✓'; font-size:10px; }
-  .tags-label { font-size:11px; color:var(--muted); margin-right:4px; }
-  /* TAGS DROPDOWN */
+/* TAGS DROPDOWN */
   #tags-dropdown { position:fixed; inset:0; z-index:200; display:none; }
   #tags-dropdown.open { display:block; }
   #tags-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); }
@@ -183,11 +177,8 @@
 
 
 <div id="toolbar-wrap">
-
-  <!-- FULL TOOLBAR -->
   <div class="toolbar" id="toolbar">
-    <!-- Row 1: Szukaj + Sortuj -->
-    <input type="text" id="search" placeholder="🔍 Szukaj…" oninput="render()">
+    <input type="text" id="search" placeholder="🔍 Szukaj utworu lub wykonawcy…" oninput="render()">
     <select id="sort" onchange="render()">
       <option value="">Sortuj…</option>
       <option value="az">A → Z</option>
@@ -196,7 +187,6 @@
       <option value="lvl_desc">Trudne → Łatwe</option>
       <option value="fav">♥ Ulubione</option>
     </select>
-    <!-- Row 2: Kategorie + Poziomy -->
     <select id="kat" onchange="render()"><option value="">Kategorie</option></select>
     <select id="lvl" onchange="render()">
       <option value="">Poziomy</option>
@@ -204,40 +194,14 @@
       <option>ŚREDNI</option>
       <option>TRUDNY</option>
     </select>
-    <!-- Row 3: + - PDF TAGI RESET -->
     <div class="toolbar-btns">
-      <button class="btn-toolbar" onclick="changeSize(-40)" style="padding-left:13px;padding-right:13px;">−</button>
-      <button class="btn-toolbar" onclick="changeSize(40)" style="padding-left:13px;padding-right:13px;">+</button>
-      <button class="btn-toolbar" onclick="exportPDF()">PDF</button>
+      <button class="btn-toolbar" onclick="changeSize(-40)">−</button>
+      <button class="btn-toolbar" onclick="changeSize(40)">+</button>
       <button class="btn-toolbar" id="tags-btn" onclick="openTagsPanel()">TAGI<span id="tags-count-badge" style="display:none;background:#ffcc00;color:#000;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:3px;"></span></button>
+      <button class="btn-toolbar" onclick="exportPDF()">PDF</button>
       <button class="btn-toolbar" onclick="resetFilters()">RESET</button>
     </div>
     <span class="count" id="count"></span>
-  </div>
-</div>
-
-<div class="tags-row" id="tags-row"></div>
-
-<!-- SCROLL TO TOP -->
-<button id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="
-  position:fixed; bottom:24px; right:20px; z-index:150;
-  width:44px; height:44px; border-radius:50%;
-  background:#ffcc00; color:#000; border:none;
-  font-size:20px; cursor:pointer; display:none;
-  align-items:center; justify-content:center;
-  box-shadow:0 4px 12px rgba(0,0,0,0.4);
-  transition:opacity 0.2s;
-">↑</button>
-
-<div id="tags-dropdown">
-  <div id="tags-backdrop" onclick="closeTagsPanel()"></div>
-  <div id="tags-panel">
-    <div id="tags-panel-header">
-      <span id="tags-panel-title">Wybierz tagi</span>
-      <button id="tags-clear" onclick="clearTags()">Wyczyść</button>
-    </div>
-    <div id="tags-chips"></div>
-    <button id="tags-apply" onclick="closeTagsPanel()">Zastosuj filtry</button>
   </div>
 </div>
 
