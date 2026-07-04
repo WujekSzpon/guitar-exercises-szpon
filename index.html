@@ -61,6 +61,30 @@
   #tags-panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
   #tags-panel-title { font-family:'Oswald',sans-serif; font-size:16px; font-weight:600; color:var(--text); }
   #tags-chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .tag-chip {
+    appearance:none;
+    background:#151515;
+    border:1px solid var(--border);
+    color:var(--muted);
+    border-radius:999px;
+    padding:7px 13px;
+    font:600 12px 'Open Sans',sans-serif;
+    line-height:1;
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  }
+  .tag-chip:hover,
+  .tag-chip:focus-visible {
+    border-color:#ffcc00;
+    color:#fff;
+    outline:none;
+  }
+  .tag-chip.active {
+    background:#ffcc00;
+    border-color:#ffcc00;
+    color:#0f0f0f;
+    box-shadow:0 0 0 2px rgba(255,204,0,0.18);
+  }
   #tags-apply { background:#ffcc00; color:#000; border:none; border-radius:8px; padding:10px 24px; font-size:13px; font-weight:700; cursor:pointer; width:100%; margin-top:16px; font-family:'Oswald',sans-serif; letter-spacing:0.04em; }
   #tags-clear { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:8px 14px; font-size:12px; cursor:pointer; }
 
