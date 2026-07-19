@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>W Szponach Gitary — Biblioteka Ćwiczeń</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Oswald:wght@500;600&display=swap');
@@ -264,7 +263,9 @@ async function sha256(text) {
 }
 // ==============================
 
-const PLIK = "https://raw.githubusercontent.com/WujekSzpon/guitar-exercises-szpon/main/%C4%86WICZENIA.xlsx";
+const SHEET_ID = "1pqG3bRKei9CBcq1qo70CyxTtrzdQhS1Md-_dqxegusc";
+const API_KEY = "AIzaSyASFzrvjpbRuGZixR6B2cQn2g-6BFZtovo";
+const SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Arkusz1?key=${API_KEY}`;
 
 const IKONY = {
   'legato':         { icon:'🎯', bg:'#1a1a2e' },
@@ -383,21 +384,22 @@ let activeTags = new Set();
 
 
 function loadExcel() {
-  fetch(PLIK)
-    .then(r => { if (!r.ok) throw new Error('Nie znaleziono pliku ' + PLIK); return r.arrayBuffer(); })
-    .then(buf => {
-      const wb = XLSX.read(buf, { type:'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
-      exercises = rows.map((r, i) => ({
+  fetch(SHEET_URL)
+    .then(r => { if (!r.ok) throw new Error('Błąd pobierania danych z Google Sheets'); return r.json(); })
+    .then(data => {
+      const rows = data.values;
+      if (!rows || rows.length < 2) throw new Error('Brak danych w arkuszu');
+      const headers = rows[0];
+      const idx = h => headers.indexOf(h);
+      exercises = rows.slice(1).map((row, i) => ({
         id: i,
-        nazwa:   r['NAZWA']           || '',
-        kat:     r['KATEGORIA']        || '',
-        poziom:  r['POZIOM']           || '',
-        tagi:    (r['TAGI'] || '').split(',').map(t => t.trim()).filter(Boolean),
-        link:    r['LINK']             || '#',
-        okladka: r['LINK DO OKŁADKI'] || '',
-        opis:    r['OPIS']             || '',
+        nazwa:   row[idx('NAZWA')]            || '',
+        kat:     row[idx('KATEGORIA')]         || '',
+        poziom:  row[idx('POZIOM')]            || '',
+        tagi:    (row[idx('TAGI')] || '').split(',').map(t => t.trim()).filter(Boolean),
+        link:    row[idx('LINK')]              || '#',
+        okladka: row[idx('LINK DO OKŁADKI')]  || '',
+        opis:    row[idx('OPIS')]              || '',
       })).filter(e => e.nazwa);
 
       // Populate kategorie
