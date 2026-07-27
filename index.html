@@ -277,12 +277,12 @@ header{border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align
 .data-check-warning{color:#ffd76a;}
 .app-version{text-align:right;color:#666;font-size:9.5px;margin-top:10px;}
 body.hide-descriptions .card-desc{display:none;}
-body.hide-tags .card-tags{display:none;}
+body.hide-tags .card-category,body.hide-tags .card-tags{display:none;}
 body.hide-stars .difficulty-stars{display:none;}
 body.hide-stars .thumb.has-stars::after{display:none;}
 body.hide-thumbnails .thumb{display:none;}
 body.hide-thumbnails .card>button{display:none !important;}
-body.cards-mini .card-desc,body.cards-mini .card-tags,body.cards-mini .difficulty-stars{display:none !important;}
+body.cards-mini .card-desc,body.cards-mini .card-category,body.cards-mini .card-tags,body.cards-mini .difficulty-stars{display:none !important;}
 body.cards-mini .thumb.has-stars::after{display:none;}
 body.cards-mini .card>button{display:none !important;}
 body.cards-mini .card-body{padding:8px 7px 9px;}
@@ -493,16 +493,22 @@ body.cards-mini .card-title{font-size:calc(12px * var(--card-title-scale));margi
 /* CARD */
 .card{background:var(--surface);border:3px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color 0.2s,transform 0.15s;text-decoration:none;display:block;container-type:inline-size;}
 .card:hover{border-color:var(--accent);border-width:4px;transform:translateY(-2px);}
+body.category-border-color .card.category-card{border-color:var(--category-color);box-shadow:0 0 9px color-mix(in srgb,var(--category-color) 34%,transparent),inset 0 0 5px color-mix(in srgb,var(--category-color) 7%,transparent);transition:border-color .2s,box-shadow .2s,transform .15s;}
+body.category-border-color .card.category-card:hover{border-color:var(--category-color);box-shadow:0 0 15px color-mix(in srgb,var(--category-color) 52%,transparent),inset 0 0 7px color-mix(in srgb,var(--category-color) 10%,transparent);}
 .thumb{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:42px;position:relative;overflow:hidden;}
 .thumb.has-stars::after{content:'';position:absolute;left:0;right:0;bottom:0;height:60px;height:18cqw;background:linear-gradient(to top,#080808 0%,rgba(8,8,8,.96) 24%,rgba(8,8,8,.76) 52%,rgba(8,8,8,.32) 78%,rgba(8,8,8,0) 100%);z-index:1;pointer-events:none;}
 .thumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;z-index:0;}
 .thumb-icon{position:relative;z-index:1;}
 .card-body{padding:10px 12px 13px;}
 .card-title{font-size:calc(15px * var(--card-title-scale));font-weight:600;color:#fff;margin-bottom:6px;line-height:1.35;text-align:center;}
+body.category-title-color .card-title.category-title{color:var(--category-color);text-shadow:0 0 7px color-mix(in srgb,var(--category-color) 38%,transparent);}
 .card.keyboard-selected{outline:3px solid var(--accent);outline-offset:3px;box-shadow:0 0 0 1px rgba(255,204,0,.55),0 0 22px rgba(255,204,0,.48);}
 .card-desc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;font-size:calc(11.5px * var(--card-desc-scale));color:#b3b3b3;margin-bottom:8px;line-height:1.4;text-align:center;}
 .card-badges{display:block;text-align:center;padding-top:10px;border-top:1px solid var(--border);margin-top:4px;margin-bottom:0;}
+.card-category{display:flex;justify-content:center;margin-top:9px;padding-top:9px;border-top:1px solid var(--border);}
+.card-category-badge{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:4px 14px;border:2px solid var(--category-color);border-radius:99px;background:var(--category-color);color:var(--category-text-color);font-size:calc(10.5px * var(--card-tag-scale));font-weight:800;line-height:1.25;letter-spacing:.055em;text-align:center;text-transform:uppercase;box-shadow:0 0 9px color-mix(in srgb,var(--category-color) 42%,transparent);}
 .card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;padding-top:7px;border-top:1px solid var(--border);justify-content:center;}
+.card-category + .card-tags{margin-top:7px;padding-top:0;border-top:0;}
 .card-tag{font-size:calc(9px * var(--card-tag-scale));padding:1px 6px;border-radius:99px;background:#222;color:#aaa;border:1px solid #333;}
 .card-tag-new{background:#d71920;color:#fff;border-color:#ff5a5f;font-weight:800;letter-spacing:.06em;box-shadow:0 0 8px rgba(215,25,32,.45);}
 .card-icon-btn{position:absolute;z-index:3;width:35px;width:8.61cqw;height:35px;height:8.61cqw;display:flex;align-items:center;justify-content:center;padding:0;border:2.5px solid currentColor;border-width:.64cqw;border-radius:50%;background:rgba(5,5,5,.72);color:var(--card-icon-light);cursor:pointer;box-shadow:0 0 5.25px rgba(211,211,211,.23),inset 0 0 6px rgba(211,211,211,.045);transition:transform .16s ease,box-shadow .16s ease,background .16s ease,color .16s ease;}
@@ -588,6 +594,8 @@ body.cards-mini .card-title{font-size:calc(12px * var(--card-title-scale));margi
   body.print-catalog .card-title{font-size:11pt !important;color:#fff !important;}
   body.print-catalog .card-desc{display:-webkit-box !important;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;font-size:8pt !important;color:#bbb !important;}
   body.print-catalog .card-tags{display:flex !important;max-height:16mm;overflow:hidden;border-color:#333 !important;}
+  body.print-catalog .card-category{display:flex !important;border-color:#333 !important;}
+  body.print-catalog.category-border-color .card.category-card{border-color:var(--category-color) !important;box-shadow:none !important;}
   body.print-catalog .card-tag{color:#aaa !important;background:#222 !important;border-color:#3a3a3a !important;}
   body.print-catalog .card-tag-new{color:#fff !important;background:#d71920 !important;border-color:#d71920 !important;}
   body.print-catalog .difficulty-stars{display:block !important;}
@@ -742,6 +750,8 @@ body.cards-mini .card-title{font-size:calc(12px * var(--card-title-scale));margi
       <div class="options-section-title">Wygląd kart</div>
       <div class="option-row"><span>Pokazuj opisy</span><label class="option-switch"><input id="opt-descriptions" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
       <div class="option-row"><span>Pokazuj tagi</span><label class="option-switch"><input id="opt-tags" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
+      <div class="option-row"><span>Dodaj kolor do obramowania</span><label class="option-switch"><input id="opt-category-border-color" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
+      <div class="option-row"><span>Dodaj kolor do tytułu</span><label class="option-switch"><input id="opt-category-title-color" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
       <div class="option-row"><span>Pokazuj gwiazdki trudności</span><label class="option-switch"><input id="opt-stars" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
       <div class="option-row"><span>Pokazuj miniatury</span><label class="option-switch"><input id="opt-thumbnails" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
       <div class="option-row"><span>Otwieraj karty w oknie podglądu</span><label class="option-switch"><input id="opt-card-preview" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
@@ -913,6 +923,8 @@ body.cards-mini .card-title{font-size:calc(12px * var(--card-title-scale));margi
             <h4><i class="ti ti-settings"></i> OPCJE</h4>
             <div class="guide-setting-row"><span>Pokazuj opisy</span><span class="guide-toggle on"></span></div>
             <div class="guide-setting-row"><span>Pokazuj tagi</span><span class="guide-toggle on"></span></div>
+            <div class="guide-setting-row"><span>Kolor obramowania kategorii</span><span class="guide-toggle on"></span></div>
+            <div class="guide-setting-row"><span>Kolor tytułu kategorii</span><span class="guide-toggle"></span></div>
             <div class="guide-setting-row"><span>Pokazuj gwiazdki trudności</span><span class="guide-toggle on"></span></div>
             <div class="guide-setting-row"><span>Pokazuj miniatury</span><span class="guide-toggle on"></span></div>
             <div class="guide-setting-row"><span>Podgląd kart po kliknięciu</span><span class="guide-toggle on"></span></div>
@@ -1278,7 +1290,7 @@ let cardSizeAuto = !savedSize;
 let favorites = new Set(JSON.parse(localStorage.getItem('wsg_favorites') || '[]'));
 
 const POPUP_FREQUENCY_MINUTES = [0, 1, 2, 3, 4];
-const DEFAULT_UI_SETTINGS = { descriptions:true, tags:true, stars:true, thumbnails:true, cardPreview:window.matchMedia('(max-width: 640px)').matches, newItemNotifications:true, autoHideToolbar:false, popupFrequency:2, popupPosition:'bottom', popupSettingsVersion:2, interfaceScale:100, titleScale:100, descriptionScale:100, tagScale:100, toolbarIconScale:100 };
+const DEFAULT_UI_SETTINGS = { descriptions:true, tags:true, categoryBorderColor:true, categoryTitleColor:false, stars:true, thumbnails:true, cardPreview:window.matchMedia('(max-width: 640px)').matches, newItemNotifications:true, autoHideToolbar:false, popupFrequency:2, popupPosition:'bottom', popupSettingsVersion:2, interfaceScale:100, titleScale:100, descriptionScale:100, tagScale:100, toolbarIconScale:100 };
 let uiSettings = {...DEFAULT_UI_SETTINGS};
 let popupScheduleTimer;
 let firstPopupPending = true;
@@ -1400,8 +1412,10 @@ function applyUiSettings() {
   document.body.classList.toggle('hide-tags', !uiSettings.tags);
   document.body.classList.toggle('hide-stars', !uiSettings.stars);
   document.body.classList.toggle('hide-thumbnails', !uiSettings.thumbnails);
+  document.body.classList.toggle('category-border-color', Boolean(uiSettings.categoryBorderColor));
+  document.body.classList.toggle('category-title-color', Boolean(uiSettings.categoryTitleColor));
   const fields = {
-    descriptions:'opt-descriptions', tags:'opt-tags', stars:'opt-stars', thumbnails:'opt-thumbnails', cardPreview:'opt-card-preview', newItemNotifications:'opt-new-item-notifications', autoHideToolbar:'opt-auto-hide-toolbar'
+    descriptions:'opt-descriptions', tags:'opt-tags', categoryBorderColor:'opt-category-border-color', categoryTitleColor:'opt-category-title-color', stars:'opt-stars', thumbnails:'opt-thumbnails', cardPreview:'opt-card-preview', newItemNotifications:'opt-new-item-notifications', autoHideToolbar:'opt-auto-hide-toolbar'
   };
   Object.entries(fields).forEach(([key, id]) => {
     const input = document.getElementById(id);
@@ -1438,6 +1452,8 @@ function saveUiSettings() {
   uiSettings = {
     descriptions: document.getElementById('opt-descriptions').checked,
     tags: document.getElementById('opt-tags').checked,
+    categoryBorderColor: document.getElementById('opt-category-border-color').checked,
+    categoryTitleColor: document.getElementById('opt-category-title-color').checked,
     stars: document.getElementById('opt-stars').checked,
     thumbnails: document.getElementById('opt-thumbnails').checked,
     cardPreview: document.getElementById('opt-card-preview').checked,
@@ -3152,17 +3168,19 @@ function render() {
     const desc  = e.opis ? `<div class="card-desc">${e.opis}</div>` : '';
     const starsHtml = difficultyStars(e.poziom);
     const newTag = isNewEntry(e.data) ? '<span class="card-tag card-tag-new">NEW!</span>' : '';
-    const categoryTag = e.kat ? `<span class="card-tag" style="background:${categoryColor(e.kat)};border-color:${categoryColor(e.kat)};color:${categoryTextColor(e.kat)};font-weight:800;text-transform:uppercase;">${e.kat}</span>` : '';
+    const categoryStyle = e.kat ? `--category-color:${categoryColor(e.kat)};--category-text-color:${categoryTextColor(e.kat)};` : '';
+    const categoryBadge = e.kat ? `<div class="card-category"><span class="card-category-badge">${e.kat}</span></div>` : '';
     const regularTags = e.tagi.map(t=>`<span class="card-tag">${t}</span>`).join('');
-    const tagsDiv = (newTag || categoryTag || regularTags) ? `<div class="card-tags">${newTag}${categoryTag}${regularTags}</div>` : '';
+    const tagsDiv = (newTag || regularTags) ? `<div class="card-tags">${newTag}${regularTags}</div>` : '';
 
     return `
-      <a class="card" data-nav-letter="${normalizeSearchText(e.nazwa).charAt(0)}" data-nav-name="${encodeURIComponent(e.nazwa)}" href="${e.link}" target="_blank" rel="noopener" onclick="return handleCardClick(event,${e.id})" style="position:relative;">
+      <a class="card${e.kat ? ' category-card' : ''}" data-nav-letter="${normalizeSearchText(e.nazwa).charAt(0)}" data-nav-name="${encodeURIComponent(e.nazwa)}" href="${e.link}" target="_blank" rel="noopener" onclick="return handleCardClick(event,${e.id})" style="position:relative;${categoryStyle}">
         ${favBtn}${ytBtn}
         <div class="thumb ${starsHtml ? 'has-stars' : ''}" style="background:#1a1a2e;">${thumb}${starsHtml}</div>
         <div class="card-body">
-          <div class="card-title">${tytul}</div>
+          <div class="card-title${e.kat ? ' category-title' : ''}">${tytul}</div>
           ${desc}
+          ${categoryBadge}
           ${tagsDiv}
         </div>
       </a>`;
