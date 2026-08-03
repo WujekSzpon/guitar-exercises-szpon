@@ -785,7 +785,7 @@ body.category-title-color .card-title.category-title{color:var(--category-color)
       <div class="option-row"><span>Powiadamiaj o nowych ćwiczeniach</span><label class="option-switch"><input id="opt-new-item-notifications" type="checkbox" onchange="saveUiSettings()"><span class="option-slider"></span></label></div>
       <div class="option-row popup-frequency-row">
         <div class="popup-frequency-copy"><span>Powiadomienia pop-up</span><span class="popup-frequency-value" id="opt-popup-frequency-label">Co 2 minuty</span></div>
-        <input id="opt-popup-frequency" type="range" min="0" max="4" step="1" value="2" aria-label="Częstotliwość powiadomień pop-up" oninput="updatePopupFrequencyPreview(this.value)" onchange="saveUiSettings()">
+        <input id="opt-popup-frequency" type="range" min="0" max="5" step="1" value="4" aria-label="Częstotliwość powiadomień pop-up" oninput="updatePopupFrequencyPreview(this.value)" onchange="saveUiSettings()">
       </div>
       <div class="option-row popup-position-row">
         <span>Położenie powiadomień</span>
@@ -1340,8 +1340,8 @@ let cardSize = savedSize ? parseInt(savedSize) : (window.innerWidth <= 640 ? 280
 let cardSizeAuto = !savedSize;
 let favorites = new Set(JSON.parse(localStorage.getItem('wsg_favorites') || '[]'));
 
-const POPUP_FREQUENCY_MINUTES = [0, 1, 2, 3, 4];
-const DEFAULT_UI_SETTINGS = { descriptions:true, tags:true, categoryBorderColor:true, categoryTitleColor:false, stars:true, thumbnails:true, cardPreview:window.matchMedia('(max-width: 640px)').matches, newItemNotifications:true, autoHideToolbar:false, popupFrequency:2, popupPosition:'bottom', popupSettingsVersion:2, interfaceScale:100, titleScale:100, descriptionScale:100, tagScale:100, toolbarIconScale:100 };
+const POPUP_FREQUENCY_SECONDS = [0, 15, 30, 60, 120, 240];
+const DEFAULT_UI_SETTINGS = { descriptions:true, tags:true, categoryBorderColor:true, categoryTitleColor:false, stars:true, thumbnails:true, cardPreview:window.matchMedia('(max-width: 640px)').matches, newItemNotifications:true, autoHideToolbar:false, popupFrequency:4, popupPosition:'bottom', popupSettingsVersion:3, interfaceScale:100, titleScale:100, descriptionScale:100, tagScale:100, toolbarIconScale:100 };
 let uiSettings = {...DEFAULT_UI_SETTINGS};
 let popupScheduleTimer;
 let firstPopupPending = true;
@@ -1403,10 +1403,11 @@ function resetVisualScaleSettings() {
 }
 
 function popupFrequencyLabel(index) {
-  const minutes = POPUP_FREQUENCY_MINUTES[Math.max(0, Math.min(4, Number(index) || 0))];
-  if (minutes === 0) return 'Wyłączone';
-  if (minutes === 1) return 'Co 1 minutę';
-  return `Co ${minutes} minuty`;
+  const seconds = POPUP_FREQUENCY_SECONDS[Math.max(0, Math.min(5, Number(index) || 0))];
+  if (seconds === 0) return 'Wyłączone';
+  if (seconds < 60) return `Co ${seconds} sekund`;
+  if (seconds === 60) return 'Co 1 minutę';
+  return `Co ${seconds / 60} minuty`;
 }
 
 function updatePopupFrequencyPreview(value) {
@@ -1414,8 +1415,8 @@ function updatePopupFrequencyPreview(value) {
   if (label) label.textContent = popupFrequencyLabel(value);
 }
 
-function popupFrequencyMinutes() {
-  return POPUP_FREQUENCY_MINUTES[Math.max(0, Math.min(4, Number(uiSettings.popupFrequency) || 0))];
+function popupFrequencySeconds() {
+  return POPUP_FREQUENCY_SECONDS[Math.max(0, Math.min(5, Number(uiSettings.popupFrequency) || 0))];
 }
 
 function normalizePopupPosition(value) {
@@ -1445,13 +1446,13 @@ function setPopupPosition(position) {
 
 function schedulePopupNotifications() {
   clearTimeout(popupScheduleTimer);
-  const minutes = popupFrequencyMinutes();
-  if (minutes === 0) {
+  const seconds = popupFrequencySeconds();
+  if (seconds === 0) {
     closePopup();
     document.getElementById('promotion-overlay')?.classList.remove('show');
     return;
   }
-  const delay = firstPopupPending ? 30 * 1000 : minutes * 60 * 1000;
+  const delay = (firstPopupPending ? Math.min(30, seconds) : seconds) * 1000;
   popupScheduleTimer = setTimeout(() => {
     firstPopupPending = false;
     showPopup();
@@ -1478,7 +1479,7 @@ function applyUiSettings() {
   updatePopupFrequencyPreview(uiSettings.popupFrequency);
   applyPopupPosition();
   applyVisualScaleSettings();
-  if (popupFrequencyMinutes() === 0) closePopup();
+  if (popupFrequencySeconds() === 0) closePopup();
   if (!uiSettings.cardPreview && document.getElementById('card-preview-modal')?.classList.contains('open')) closeCardPreview();
 }
 
@@ -1486,9 +1487,11 @@ function loadUiSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem('wsg_ui_settings') || '{}');
     if (!Number.isInteger(saved.popupFrequency)) saved.popupFrequency = saved.notifications === false ? 0 : DEFAULT_UI_SETTINGS.popupFrequency;
-    if (saved.popupSettingsVersion !== 2) {
-      if (saved.notifications !== false && saved.popupFrequency !== 0) saved.popupFrequency = DEFAULT_UI_SETTINGS.popupFrequency;
-      saved.popupSettingsVersion = 2;
+    if (saved.popupSettingsVersion !== 3) {
+      const oldMinutes = Math.max(0, Math.min(4, Number(saved.popupFrequency) || 0));
+      saved.popupFrequency = oldMinutes === 0 ? 0 : (oldMinutes === 1 ? 3 : oldMinutes === 2 ? 4 : 5);
+      if (saved.notifications === false) saved.popupFrequency = 0;
+      saved.popupSettingsVersion = 3;
     }
     delete saved.notifications;
     saved.popupPosition = normalizePopupPosition(saved.popupPosition);
@@ -1513,7 +1516,7 @@ function saveUiSettings() {
     autoHideToolbar: document.getElementById('opt-auto-hide-toolbar').checked,
     popupFrequency: Number(document.getElementById('opt-popup-frequency').value),
     popupPosition: normalizePopupPosition(uiSettings.popupPosition),
-    popupSettingsVersion:2,
+    popupSettingsVersion:3,
     interfaceScale: normalizeVisualScale(uiSettings.interfaceScale),
     titleScale: normalizeVisualScale(uiSettings.titleScale),
     descriptionScale: normalizeVisualScale(uiSettings.descriptionScale),
@@ -2081,9 +2084,14 @@ function importSettings(event) {
       const importedSettings = {...data.uiSettings};
       if (!Number.isInteger(importedSettings.popupFrequency)) importedSettings.popupFrequency = importedSettings.notifications === false ? 0 : DEFAULT_UI_SETTINGS.popupFrequency;
       delete importedSettings.notifications;
-      importedSettings.popupFrequency = Math.max(0, Math.min(4, importedSettings.popupFrequency));
+      if (importedSettings.popupSettingsVersion !== 3) {
+        const oldMinutes = Math.max(0, Math.min(4, Number(importedSettings.popupFrequency) || 0));
+        importedSettings.popupFrequency = oldMinutes === 0 ? 0 : (oldMinutes === 1 ? 3 : oldMinutes === 2 ? 4 : 5);
+      } else {
+        importedSettings.popupFrequency = Math.max(0, Math.min(5, importedSettings.popupFrequency));
+      }
       importedSettings.popupPosition = normalizePopupPosition(importedSettings.popupPosition);
-      importedSettings.popupSettingsVersion = 2;
+      importedSettings.popupSettingsVersion = 3;
       uiSettings = {...DEFAULT_UI_SETTINGS, ...importedSettings};
       localStorage.setItem('wsg_ui_settings', JSON.stringify(uiSettings));
       if (Number.isFinite(data.cardSize)) {
@@ -3512,7 +3520,7 @@ fetch(PROMOTIONS_URL)
   }).catch(() => {});
 
 function showPopup() {
-  if (popupFrequencyMinutes() === 0) return;
+  if (popupFrequencySeconds() === 0) return;
   if (!PORADY.length && !PROMOTIONS.length) return;
   closePopup();
   closePromotion();
