@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gitarowe-cwiczenia-v6';
+const CACHE_NAME = 'gitarowe-cwiczenia-v7';
 const APP_SHELL = [
   './',
   './manifest-cwiczenia.webmanifest',
