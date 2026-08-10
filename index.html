@@ -48,6 +48,11 @@ header{border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align
 .toolbar input::placeholder{color:var(--muted);}
 .toolbar input:focus,.toolbar select:focus{border-color:var(--accent);}
 .toolbar select option{background:#1a1a1a;}
+.toolbar-select-button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 12px;font:calc(13px * var(--ui-font-scale)) 'Open Sans',sans-serif;cursor:pointer;text-align:left;}
+.toolbar-select-button:hover,.toolbar-select-button:focus-visible,.toolbar-select-button.active{border-color:var(--accent);outline:none;}
+.toolbar-select-button.active{color:var(--accent);background:rgba(255,204,0,.055);}
+.toolbar-select-button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.toolbar-select-button i{flex:0 0 auto;color:var(--muted);font-size:15px;}
 #search{width:100% !important;}
 #sort,#kat,#lvl{width:100% !important;}
 .btn-toolbar{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:7px 11px;font-size:calc(12px * var(--ui-font-scale));cursor:pointer;font-family:'Open Sans',sans-serif;transition:border-color 0.15s,color 0.15s;width:100%;}
@@ -463,6 +468,30 @@ body.cards-mini .card-title{font-size:calc(12px * var(--card-title-scale));margi
 #tags-apply{background:#ffcc00;color:#000;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:16px;font-family:'Oswald',sans-serif;letter-spacing:0.04em;}
 #tags-clear{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;}
 
+/* CATEGORIES MULTISELECT */
+#categories-dropdown{position:fixed;inset:0;z-index:201;display:none;}
+#categories-dropdown.open{display:block;}
+#categories-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.64);}
+#categories-panel{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:16px 16px 0 0;padding:18px;max-height:78vh;overflow-y:auto;}
+@media(min-width:641px){#categories-panel{bottom:auto;left:50%;top:50%;right:auto;transform:translate(-50%,-50%);width:460px;max-height:82vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.72);}}
+.categories-panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px;}
+.categories-panel-title{font:600 19px 'Oswald',sans-serif;color:#fff;}
+.categories-search{width:100%;margin-bottom:11px;background:#111;border:1px solid var(--border);border-radius:7px;color:#fff;padding:10px 12px;font:13px 'Open Sans',sans-serif;outline:none;}
+.categories-search:focus{border-color:var(--accent);}
+#categories-choices{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.category-choice{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;border:1px solid #333;border-radius:7px;background:#151515;color:#ccc;padding:9px 10px;font:600 12px 'Open Sans',sans-serif;cursor:pointer;text-align:left;}
+.category-choice:hover,.category-choice:focus-visible{border-color:#777;color:#fff;outline:none;}
+.category-choice.active{border-color:var(--accent);color:var(--accent);background:rgba(255,204,0,.09);}
+.category-choice-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.category-choice-count{flex:0 0 auto;color:#888;font-size:10px;font-weight:700;}
+.category-choice.active .category-choice-count{color:#d7b300;}
+.categories-empty{grid-column:1/-1;color:#888;font-size:12px;text-align:center;padding:18px 8px;}
+.categories-actions{display:grid;grid-template-columns:1fr 1.5fr;gap:8px;margin-top:13px;}
+.categories-actions button{min-height:40px;border-radius:7px;font:700 12px 'Open Sans',sans-serif;cursor:pointer;}
+.categories-clear{border:1px solid var(--border);background:transparent;color:#aaa;}
+.categories-apply{border:0;background:var(--accent);color:#111;}
+@media(max-width:420px){#categories-choices{grid-template-columns:1fr}.categories-panel-title{font-size:18px}}
+
 /* GRID */
 .grid-wrap{padding:1.5rem 1.5rem 3rem;}
 .section-label{font-family:'Oswald',sans-serif;font-size:calc(11px * var(--ui-font-scale));letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
@@ -628,7 +657,7 @@ body.category-title-color .card-title.category-title{color:var(--category-color)
 
 /* PRINT */
 @media print{
-  #login-screen,header,#toolbar-wrap,#tags-dropdown,#tip-popup,#promotion-overlay,#scroll-top-btn,#export-modal,#card-size-modal{display:none !important;}
+  #login-screen,header,#toolbar-wrap,#tags-dropdown,#categories-dropdown,#tip-popup,#promotion-overlay,#scroll-top-btn,#export-modal,#card-size-modal{display:none !important;}
   body{background:white !important;color:black !important;}
   .card{border:1px solid #ccc !important;break-inside:avoid;background:#f9f9f9 !important;}
   .card-title{color:black !important;}
@@ -700,9 +729,8 @@ body.category-title-color .card-title.category-title{color:var(--category-color)
       <option value="lvl_desc">Trudne → Łatwe</option>
       <option value="fav">♥ Ulubione</option>
     </select>
-    <select id="kat" aria-label="Wybierz kategorię" onchange="render()">
-      <option value="">Wybierz kategorię</option>
-    </select>
+    <button class="toolbar-select-button" id="categories-btn" type="button" onclick="openCategoriesPanel()" aria-label="Wybierz jedną lub kilka kategorii" aria-expanded="false" aria-controls="categories-dropdown"><span id="categories-btn-label">Wybierz kategorię</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+    <input id="kat" type="hidden" value="">
     <select id="lvl" aria-label="Poziom trudności" onchange="render()">
       <option value="">Poziom trudności</option>
       <option value="POCZĄTKUJĄCY">POCZĄTKUJĄCY — ★</option>
@@ -747,6 +775,19 @@ body.category-title-color .card-title.category-title{color:var(--category-color)
     </div>
     <div id="tags-chips"></div>
     <button id="tags-apply" onclick="closeTagsPanel()">Zastosuj filtry</button>
+  </div>
+</div>
+
+<div id="categories-dropdown" role="dialog" aria-modal="true" aria-labelledby="categories-panel-title" aria-hidden="true">
+  <div id="categories-backdrop" onclick="closeCategoriesPanel()"></div>
+  <div id="categories-panel" tabindex="-1">
+    <div class="categories-panel-header">
+      <span class="categories-panel-title" id="categories-panel-title">Wybierz kategorie</span>
+      <button class="options-close" type="button" onclick="closeCategoriesPanel()" aria-label="Zamknij wybór kategorii">✕</button>
+    </div>
+    <input class="categories-search" id="categories-search" type="search" placeholder="Szukaj kategorii…" aria-label="Szukaj kategorii" oninput="renderCategoryChoices()">
+    <div id="categories-choices"></div>
+    <div class="categories-actions"><button class="categories-clear" type="button" onclick="clearCategories()">WYCZYŚĆ</button><button class="categories-apply" type="button" onclick="closeCategoriesPanel()">ZASTOSUJ</button></div>
   </div>
 </div>
 
@@ -956,7 +997,7 @@ body.category-title-color .card-title.category-title{color:var(--category-color)
         <div class="guide-step-grid">
           <div class="guide-step-card"><span class="guide-step-number">1</span><strong>Szukaj</strong>Wpisz nazwę ćwiczenia albo rozpoznawalne słowo. Wyszukiwarka działa również bez polskich znaków. <b>Shift + Spacja</b> ustawia kursor w polu.</div>
           <div class="guide-step-card"><span class="guide-step-number">2</span><strong>Sortowanie</strong>Ułóż ćwiczenia alfabetycznie, według kategorii lub trudności. Możesz też pokazać tylko nowości albo ulubione. Domyślnie nowe ćwiczenia znajdują się na początku.</div>
-          <div class="guide-step-card"><span class="guide-step-number">3</span><strong>Filtry</strong>Wybierz kategorię, poziom trudności oraz jeden lub kilka tagów. Wszystkie wybrane warunki działają jednocześnie.</div>
+          <div class="guide-step-card"><span class="guide-step-number">3</span><strong>Filtry</strong>Zaznacz jedną lub kilka kategorii, wybierz poziom trudności oraz jeden lub kilka tagów. Wszystkie wybrane warunki działają jednocześnie.</div>
         </div>
         <div class="guide-icon-grid" aria-label="Opis przycisków paska sterowania">
           <div class="guide-icon-card pink"><i class="ti ti-heart"></i><strong>Ulubione</strong>Pokazuje wyłącznie ćwiczenia zapisane sercem w tej przeglądarce.</div>
@@ -1040,7 +1081,7 @@ body.category-title-color .card-title.category-title{color:var(--category-color)
       <div class="guide-grid">
         <div class="guide-card"><strong>🔍 Szukaj</strong>Wpisz nazwę ćwiczenia lub szukaną technikę. Wyszukiwarka rozpoznaje również zapytania wpisane bez polskich znaków. Skrót <b>Shift + Spacja</b> przenosi kursor od razu do wyszukiwarki.</div>
         <div class="guide-card"><strong>Sortowanie</strong>Ułóż ćwiczenia alfabetycznie, według poziomu trudności albo pokaż ulubione. Domyślnie nowe materiały są przez 30 dni wyświetlane najpierw, a obie grupy są ułożone alfabetycznie.</div>
-        <div class="guide-card"><strong>Kategoria i poziom trudności</strong>Wybierz kategorię ćwiczenia albo poziom od początkującego do eksperta, aby ograniczyć listę do materiałów dopasowanych do celu nauki.</div>
+        <div class="guide-card"><strong>Kategorie i poziom trudności</strong>Możesz zaznaczyć kilka kategorii ćwiczeń jednocześnie oraz wybrać poziom od początkującego do eksperta, aby ograniczyć listę do materiałów dopasowanych do celu nauki.</div>
         <div class="guide-card"><strong>TAGI</strong>Połącz kilka cech lub technik gry. Licznik przy przycisku pokazuje liczbę aktywnych tagów.</div>
         <div class="guide-card"><strong>Lupa i oko</strong>Lupa reguluje wielkość kart lub przywraca tryb automatyczny. Przekreślone oko chowa panel; po zwinięciu użyj paska „KLIKNIJ, ABY ROZWINĄĆ”.</div>
         <div class="guide-card"><strong>PDF, RESET i Opcje</strong>PDF otwiera sposoby eksportu. RESET czyści aktywne filtry i sortowanie. Koło zębate otwiera ustawienia wyglądu, powiadomień, kontaktu i kontroli danych.</div>
@@ -1381,6 +1422,8 @@ let rawExcelRows = [];
 let dataValidationIssues = [];
 let excelLoaded = false;
 let activeTags = new Set();
+let activeCategories = new Set();
+let categoryCounts = new Map();
 const savedSize = localStorage.getItem('wsg_cardsize');
 let cardSize = savedSize ? parseInt(savedSize) : (window.innerWidth <= 640 ? 280 : 440);
 let cardSizeAuto = !savedSize;
@@ -3016,6 +3059,7 @@ const ACCESSIBLE_DIALOGS = [
   {id:'card-size-modal', close:closeCardSizeModal},
   {id:'content-library-modal', close:closeContentLibrary},
   {id:'options-modal', close:closeOptions},
+  {id:'categories-dropdown', close:closeCategoriesPanel},
   {id:'tags-dropdown', close:closeTagsPanel}
 ];
 
@@ -3424,15 +3468,15 @@ function loadExcel() {
       })).filter(e => e.nazwa);
 
       // Populate kategorie
-      const categories = [...new Set(exercises.map(exercise => exercise.kat).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pl'));
-      const sel = document.getElementById('kat');
-      while (sel.options.length > 1) sel.remove(1);
-      categories.forEach(category => {
-        const o = document.createElement('option');
-        o.value = category;
-        o.textContent = category;
-        sel.appendChild(o);
+      categoryCounts = exercises.reduce((counts, exercise) => {
+        if (exercise.kat) counts.set(exercise.kat, (counts.get(exercise.kat) || 0) + 1);
+        return counts;
+      }, new Map());
+      activeCategories.forEach(category => {
+        if (!categoryCounts.has(category)) activeCategories.delete(category);
       });
+      syncCategoryFilterValue();
+      updateCategoriesButtonState();
 
       // Populate tagi
       const allTags = [...new Set(exercises.flatMap(e => e.tagi))].sort();
@@ -3493,7 +3537,7 @@ function updateResetButtonState() {
   const filtersActive = Boolean(
     document.getElementById('search').value.trim() ||
     document.getElementById('sort').value ||
-    document.getElementById('kat').value ||
+    activeCategories.size ||
     document.getElementById('lvl').value ||
     activeTags.size
   );
@@ -3504,7 +3548,6 @@ function updateResetButtonState() {
 
 function render() {
   const q  = normalizeSearchText(document.getElementById('search').value);
-  const kt = document.getElementById('kat').value;
   const lv = document.getElementById('lvl').value;
   const sv = document.getElementById('sort').value;
   updateFavoritesFilterButtonState();
@@ -3513,7 +3556,7 @@ function render() {
 
   let filtered = exercises.filter(e =>
     (!q  || normalizeSearchText(e.nazwa).includes(q) || normalizeSearchText(e.kat).includes(q) || normalizeSearchText(e.opis).includes(q) || e.tagi.some(tag => normalizeSearchText(tag).includes(q))) &&
-    (!kt || e.kat === kt) &&
+    (activeCategories.size === 0 || activeCategories.has(e.kat)) &&
     (!lv || (lv === 'TRUDNY' ? ['TRUDNY','ZAAWANSOWANY'].includes(e.poziom.toUpperCase()) : e.poziom.toUpperCase() === lv)) &&
     (activeTags.size === 0 || [...activeTags].every(t => e.tagi.includes(t))) &&
     (sv !== 'fav' || favorites.has(e.id))
@@ -3529,7 +3572,10 @@ function render() {
   else if (sv === 'lvl_desc') filtered.sort((a,b) => (lvlOrder[b.poziom]??99)-(lvlOrder[a.poziom]??99));
 
   const parts = [];
-  if (kt) parts.push(kt);
+  const selectedCategories = [...activeCategories].sort((a, b) => a.localeCompare(b, 'pl'));
+  if (selectedCategories.length === 1) parts.push(selectedCategories[0]);
+  else if (selectedCategories.length > 1 && selectedCategories.length <= 3) parts.push(selectedCategories.join(', '));
+  else if (selectedCategories.length > 3) parts.push(`${selectedCategories.length} kategorii`);
   if (lv) parts.push(lv);
   activeTags.forEach(t => parts.push('#'+t));
   const sectionLabel = document.getElementById('section-label');
@@ -3612,6 +3658,95 @@ function toggleTag(tag, btn) {
   else { activeTags.add(tag); btn.classList.add('active'); }
   btn.setAttribute('aria-pressed', String(activeTags.has(tag)));
   updateTagsBadge();
+}
+
+function syncCategoryFilterValue() {
+  const legacyInput = document.getElementById('kat');
+  if (legacyInput) legacyInput.value = [...activeCategories].join('||');
+}
+
+function updateCategoriesButtonState() {
+  const button = document.getElementById('categories-btn');
+  const label = document.getElementById('categories-btn-label');
+  if (!button || !label) return;
+  const selected = [...activeCategories].sort((a, b) => a.localeCompare(b, 'pl'));
+  const categoryWord = selected.length >= 2 && selected.length <= 4 ? 'kategorie' : 'kategorii';
+  label.textContent = selected.length === 0 ? 'Wybierz kategorię' : selected.length === 1 ? selected[0] : `${selected.length} ${categoryWord}`;
+  button.classList.toggle('active', selected.length > 0);
+  button.title = selected.length ? `Wybrano: ${selected.join(', ')}` : 'Wybierz jedną lub kilka kategorii';
+}
+
+function renderCategoryChoices() {
+  const container = document.getElementById('categories-choices');
+  if (!container) return;
+  const query = normalizeSearchText(document.getElementById('categories-search')?.value || '');
+  const available = [...categoryCounts.entries()]
+    .filter(([category]) => !query || normalizeSearchText(category).includes(query))
+    .sort(([a], [b]) => a.localeCompare(b, 'pl'));
+  container.innerHTML = '';
+  if (!available.length) {
+    const empty = document.createElement('div');
+    empty.className = 'categories-empty';
+    empty.textContent = 'Nie znaleziono kategorii.';
+    container.appendChild(empty);
+    return;
+  }
+  available.forEach(([category, count]) => {
+    const button = document.createElement('button');
+    const selected = activeCategories.has(category);
+    button.type = 'button';
+    button.className = `category-choice${selected ? ' active' : ''}`;
+    button.setAttribute('aria-pressed', String(selected));
+    const name = document.createElement('span');
+    name.className = 'category-choice-name';
+    name.textContent = category;
+    const amount = document.createElement('span');
+    amount.className = 'category-choice-count';
+    amount.textContent = exerciseCountLabel(count);
+    button.append(name, amount);
+    button.addEventListener('click', () => toggleCategory(category, button));
+    container.appendChild(button);
+  });
+}
+
+function toggleCategory(category, button) {
+  if (activeCategories.has(category)) activeCategories.delete(category);
+  else activeCategories.add(category);
+  const selected = activeCategories.has(category);
+  button.classList.toggle('active', selected);
+  button.setAttribute('aria-pressed', String(selected));
+  syncCategoryFilterValue();
+  updateCategoriesButtonState();
+}
+
+function openCategoriesPanel() {
+  const dialog = document.getElementById('categories-dropdown');
+  dialogReturnFocus.set('categories-dropdown', document.activeElement);
+  document.getElementById('categories-search').value = '';
+  renderCategoryChoices();
+  dialog.classList.add('open');
+  dialog.setAttribute('aria-hidden', 'false');
+  document.getElementById('categories-btn').setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => document.getElementById('categories-panel').focus({preventScroll:true}));
+}
+
+function closeCategoriesPanel() {
+  const dialog = document.getElementById('categories-dropdown');
+  dialog.classList.remove('open');
+  dialog.setAttribute('aria-hidden', 'true');
+  document.getElementById('categories-btn').setAttribute('aria-expanded', 'false');
+  const returnTarget = dialogReturnFocus.get('categories-dropdown');
+  dialogReturnFocus.delete('categories-dropdown');
+  if (returnTarget && typeof returnTarget.focus === 'function') returnTarget.focus({preventScroll:true});
+  render();
+}
+
+function clearCategories() {
+  activeCategories.clear();
+  syncCategoryFilterValue();
+  updateCategoriesButtonState();
+  renderCategoryChoices();
+  render();
 }
 
 function openTagsPanel() {
@@ -3704,7 +3839,9 @@ document.addEventListener('DOMContentLoaded', enablePinchCardSizing);
 
 function resetFilters() {
   document.getElementById('search').value = '';
-  document.getElementById('kat').value = '';
+  activeCategories.clear();
+  syncCategoryFilterValue();
+  updateCategoriesButtonState();
   document.getElementById('lvl').value = '';
   document.getElementById('sort').value = '';
   activeTags.clear();
