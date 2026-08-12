@@ -1,9 +1,9 @@
-const CACHE_NAME = 'gitarowe-cwiczenia-v11';
+const CACHE_NAME = 'gitarowe-cwiczenia-v12';
 const APP_SHELL = [
   './',
   './manifest-cwiczenia.webmanifest',
-  './pwa-cwiczenia-192.png',
-  './pwa-cwiczenia-512.png'
+  './pwa-cwiczenia-192-v2.png',
+  './pwa-cwiczenia-512-v2.png'
 ];
 
 self.addEventListener('install', event => {
