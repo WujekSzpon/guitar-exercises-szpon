@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gitarowe-cwiczenia-v12';
+const CACHE_NAME = 'gitarowe-cwiczenia-v13';
 const APP_SHELL = [
   './',
   './manifest-cwiczenia.webmanifest',
@@ -41,8 +41,10 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      if (response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      }
       return response;
     }))
   );
